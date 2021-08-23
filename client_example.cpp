@@ -76,15 +76,19 @@ int main() {
 	{
 		pipe_ret_t sendRet;
 		std::string msg;
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 3; i++) {
 
-			msg = "hello server" + std::to_string(i) + "\n";
+			msg = "hello server" + std::to_string(i);
+			for (int l = 0; l < 11;l++) {
+				std::string tmp = msg + msg;
+				msg = tmp;
+			}
+			//std::cout << "??send" << msg << std::endl;
 			sendRet = client.sendMsg(msg, msg.size());
 			if (!sendRet.success) {
 				std::cout << "Failed to send msg: " << sendRet.msg << std::endl;
 				break;
 			}
-			system("pause");
 		}
 
 		msg = "11234\n";

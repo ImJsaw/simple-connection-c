@@ -128,7 +128,7 @@ pipe_ret_t TcpClient::finish(){
     stop = true;
     terminateReceiveThread();
     pipe_ret_t ret;
-    if (_close(m_sockfd) == -1) { // close failed
+    if (closesocket(m_sockfd) == -1) { // close failed
         char errMsg[256];
         ret.success = false;
         ret.msg = strerror_s(errMsg, 256, errno);

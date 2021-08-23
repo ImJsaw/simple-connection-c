@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
             server.printClients();
         } else {
             std::cout << "Accepting client failed: " << client.getInfoMessage() << std::endl;
+            break;
         }
         Sleep(1);
     }

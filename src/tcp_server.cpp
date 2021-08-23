@@ -34,12 +34,12 @@ void TcpServer::receiveTask(/*TcpServer *context*/) {
         std::cout << numOfBytesReceived << "bytes received" << std::endl;
         std::string recv = msg;
         recv = recv.substr(0, numOfBytesReceived);
-        std::cout << recv << std::endl;
+        //std::cout << recv << std::endl;
         if(numOfBytesReceived < 1) {
             client->setDisconnected();
             if (numOfBytesReceived == 0) { //client closed connection
                 client->setErrorMessage("Client closed connection");
-                //printf("client closed");
+                printf("client closed");
             } else {
                 client->setErrorMessage("Unknown Error");
             }
@@ -261,16 +261,20 @@ pipe_ret_t TcpServer::finish() {
     pipe_ret_t ret;
     for (uint i=0; i<m_clients.size(); i++) {
         m_clients[i].setDisconnected();
-        if (_close(m_clients[i].getFileDescriptor()) == -1) { // close failed
+        std::cout << "Closing client..." << i << std::endl;
+        if (closesocket(m_clients[i].getFileDescriptor()) == -1) { // close failed
             char errMsg[256];
             ret.success = false;
+            std::cout << "Closing client...failed " << i << std::endl;
             ret.msg = strerror_s(errMsg, 256, errno);
             return ret;
         }
     }
-    if (_close(m_sockfd) == -1) { // close failed
+    std::cout << "Closing server self..." << std::endl;
+    if (closesocket(m_sockfd) == -1) { // close failed
         char errMsg[256];
         ret.success = false;
+        std::cout << "Closing server...failed"<< std::endl;
         ret.msg = strerror_s(errMsg, 256, errno);
         return ret;
     }
