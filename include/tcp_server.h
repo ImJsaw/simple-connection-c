@@ -5,6 +5,7 @@
 
 #include "client.h"
 #include "server_observer.h"
+#include <thread>
 
 #define MAX_PACKET_SIZE 4096
 
@@ -24,13 +25,21 @@ private:
     void publishClientDisconnected(const Client & client);
     void receiveTask(/*void * context*/);
 
+    void subscribe(const server_observer_t& observer);
+
+    std::thread* serverThread;
+
 
 public:
-
     pipe_ret_t start(int port);
+
+    void addClient(std::string ip, incoming_packet_func_t recieveFunc, disconnected_func_t disconnectFunc);
     Client acceptClient(uint timeout);
     bool deleteClient(Client & client);
-    void subscribe(const server_observer_t & observer);
+
+    void startListenThread();
+    void listenClient();
+
     void unsubscribeAll();
     pipe_ret_t sendToAllClients(const char * msg, size_t size);
     pipe_ret_t sendToClient(const Client & client, const char * msg, size_t size);

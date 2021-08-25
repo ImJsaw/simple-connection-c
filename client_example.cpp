@@ -55,26 +55,15 @@ int main() {
     //register to SIGINT to close client when user press ctrl+c
 	signal(SIGINT, sig_exit);
 
-    // configure and register observer
-    client_observer_t observer;
-	observer.wantedIp = "127.0.0.1";
-	observer.incoming_packet_func = onIncomingMsg;
-	observer.disconnected_func = onDisconnection;
-	client.subscribe(observer);
+	client = TcpClient("127.0.0.1", onIncomingMsg, onDisconnection);
 
 	// connect client to an open server
-    pipe_ret_t connectRet = client.connectTo("127.0.0.1", 65123);
-	if (connectRet.success) {
-		std::cout << "Client connected successfully" << std::endl;
-	} else {
-		std::cout << "Client failed to connect: " << connectRet.msg << std::endl;
-		return EXIT_FAILURE;
-	}
+    bool res = client.connectServer(65123);
 
 	// send messages to server
 	while(1)
 	{
-		pipe_ret_t sendRet;
+		bool sendRet;
 		std::string msg;
 		for (int i = 0; i < 3; i++) {
 
@@ -84,33 +73,18 @@ int main() {
 				msg = tmp;
 			}
 			//std::cout << "??send" << msg << std::endl;
-			sendRet = client.sendMsg(msg, msg.size());
-			if (!sendRet.success) {
-				std::cout << "Failed to send msg: " << sendRet.msg << std::endl;
-				break;
-			}
+			sendRet = client.sendToServer(msg);
 		}
 
 		msg = "11234\n";
-		sendRet = client.sendMsg(msg, msg.size());
-		if (!sendRet.success) {
-			std::cout << "Failed to send msg: " << sendRet.msg << std::endl;
-			break;
-		}
+		sendRet = client.sendToServer(msg);
 
 		msg = "print\n";
-		sendRet = client.sendMsg(msg, msg.size());
-		if (!sendRet.success) {
-			std::cout << "Failed to send msg: " << sendRet.msg << std::endl;
-			break;
-		}
+		sendRet = client.sendToServer(msg);
 
 		msg = "quit\n";
-		sendRet = client.sendMsg(msg, msg.size());
-		if (!sendRet.success) {
-			std::cout << "Failed to send msg: " << sendRet.msg << std::endl;
-			break;
-		}
+		sendRet = client.sendToServer(msg);
+
 		Sleep(100000);
 	}
 

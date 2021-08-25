@@ -43,7 +43,7 @@ void TcpServer::receiveTask(/*TcpServer *context*/) {
             } else {
                 client->setErrorMessage("Unknown Error");
             }
-            _close(client->getFileDescriptor());
+            closesocket(client->getFileDescriptor());
             publishClientDisconnected(*client);
             deleteClient(*client);
             break;
@@ -72,6 +72,27 @@ bool TcpServer::deleteClient(Client & client) {
     }
     return false;
 }
+
+void TcpServer::startListenThread(){
+    serverThread = new std::thread(&TcpServer::listenClient,this);
+}
+
+void TcpServer::listenClient(){
+    while (1) {
+        Client client = this->acceptClient(0);
+        std::cout << "start client accepted" << std::endl;
+        if (client.isConnected()) {
+            std::cout << "Got client with IP: " << client.getIp() << std::endl;
+            printClients();
+        }
+        else {
+            std::cout << "Accepting client failed: " << client.getInfoMessage() << std::endl;
+            break;
+        }
+        Sleep(1);
+    }
+}
+
 
 /*
  * Publish incoming client message to observer.
@@ -103,6 +124,14 @@ void TcpServer::publishClientDisconnected(const Client & client) {
             }
         }
     }
+}
+
+void TcpServer::addClient(std::string ip, incoming_packet_func_t onIncomingMsg, disconnected_func_t onDisconnection){
+    server_observer_t observer;
+    observer.wantedIp = ip;
+    observer.incoming_packet_func = onIncomingMsg;
+    observer.disconnected_func = onDisconnection;
+    subscribe(observer);
 }
 
 /*

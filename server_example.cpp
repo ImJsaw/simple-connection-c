@@ -75,29 +75,29 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    /*
     // configure and register observer1
     observer1.incoming_packet_func = onIncomingMsg1;
     observer1.disconnected_func = onClientDisconnected;
     observer1.wantedIp = "127.0.0.1";
     server.subscribe(observer1);
+    */
 
+    server.addClient("127.0.0.1", onIncomingMsg1, onClientDisconnected);
+
+    /*
     // configure and register observer2
     observer2.incoming_packet_func = onIncomingMsg2;
-    observer1.disconnected_func = nullptr; //don't care about disconnection
+    observer2.disconnected_func = nullptr; //don't care about disconnection
     observer2.wantedIp = "10.88.0.11"; // use empty string instead to receive messages from any IP address
     server.subscribe(observer2);
+    */
+    server.addClient("10.88.0.11", onIncomingMsg2, nullptr);
 
-    // receive clients
-    while(1) {
-        Client client = server.acceptClient(0);
-        if (client.isConnected()) {
-            std::cout << "Got client with IP: " << client.getIp() << std::endl;
-            server.printClients();
-        } else {
-            std::cout << "Accepting client failed: " << client.getInfoMessage() << std::endl;
-            break;
-        }
-        Sleep(1);
+    server.startListenThread();
+
+    while (1) {
+        //make main thread not end
     }
 
     return 0;

@@ -40,6 +40,22 @@ pipe_ret_t TcpClient::connectTo(const std::string & address, int port) {
     return ret;
 }
 
+bool TcpClient::connectServer(int port){
+    pipe_ret_t result = connectTo(server_ip, port);
+    if (!result.success) {
+        cout << "Failed to send msg: " << result.msg << endl;
+    }
+    return result.success;
+}
+
+bool TcpClient::sendToServer(string msg){
+    pipe_ret_t result = sendMsg(msg, msg.size());
+    if (!result.success) {
+        cout << "Failed to send msg: " << result.msg << endl;
+    }
+    return result.success;
+}
+
 
 pipe_ret_t TcpClient::sendMsg(std::string msg, size_t size) {
     pipe_ret_t ret;
@@ -144,6 +160,20 @@ void TcpClient::terminateReceiveThread() {
         delete m_receiveTask;
         m_receiveTask = nullptr;
     }
+}
+
+TcpClient::TcpClient(string ip, incoming_packet_func_t onIncomingMsg, disconnected_func_t onDisconnection){
+    // configure and register observer
+    server_ip = ip;
+    client_observer_t observer;
+    observer.wantedIp = server_ip;
+    observer.incoming_packet_func = onIncomingMsg;
+    observer.disconnected_func = onDisconnection;
+    subscribe(observer);
+}
+
+TcpClient::TcpClient()
+{
 }
 
 TcpClient::~TcpClient() {
